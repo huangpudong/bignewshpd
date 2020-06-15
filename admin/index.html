@@ -91,13 +91,14 @@
                         flag = 0;
                     }
                     $('.icon-arrowdownl').toggleClass('rotate0')
+                    $('.level02>li').eq(0).click()
                 }
             })
 
             $('.level02>li').click(function() {
                 $(this).addClass('active').siblings('li').removeClass('active')
             })
-            $('.level02>li').eq(0).click()
+
         })
     </script>
 </body>
