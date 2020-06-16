@@ -90,10 +90,10 @@
                     //         $('.level02').hide('normal')
                     //         flag = 0;
                     //     }
-                    // $('.level02').slideToggle();
-                    $("ul.level02").slideToggle();
+                    $('.level02').slideToggle();
                     $('.icon-arrowdownl').toggleClass('rotate0')
-                        // DOM对象的默认点击事件,不仅会触发自身事件,还会触发a标签的默认跳转事件
+                        // js对象的.click(), 不仅会触发自身事件,还会触发a标签的默认跳转事件
+                        // jq对象的.click(), 仅会触发自身事件,不会触发a标签的默认跳转
                     $('.level02>li').eq(0).children('a')[0].click()
                         // $("ul.level02>li:eq(0)>a")[0].click();
                 }

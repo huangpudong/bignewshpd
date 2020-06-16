@@ -59,6 +59,8 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 用一个隐藏框来存储id -->
+                        <input type="hidden" name="" id="categoryId">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">文章分类名称:</label>
                             <input type="text" class="form-control" id="recipient-name">
@@ -71,7 +73,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary">新增</button>
+                    <button type="button" class="btn btn-primary" id="addorexit">新增</button>
                 </div>
             </div>
         </div>
@@ -82,29 +84,142 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:void(0)" data-toggle="modal" data-target="#myModal" data-id="{{v.id}}" class=" btn btn-info btn-xs">编辑</a>
-                <a href="javascript:void(0)" data-id="{{v.id}} class=" btn btn-danger btn-xs ">删除</a>
+                <a href="javascript:void(0)" data-toggle="modal" data-target="#myModal" id="exit" data-id="{{v.id}}" class=" btn btn-info btn-xs">编辑</a>
+                <a href="javascript:void(0)" data-id="{{v.id}}" class="btn btn-danger btn-xs" id="btn-delete">删除</a>
             </td>
         </tr>
         {{/each}}
     </script>
     <script src="./libs/http.js "></script>
     <script>
-        function getcategory(){
+        // 需求1: 进入文章类别管理页面,就要发生ajax请求,获取所有的文章类别并渲染到页面
+        function getcategory() {
             $.ajax({
-            url:BigNew.category_list,
-            success:function(data){
-                // console.log(data);
-                var resHtml = template('temp_category',data);
-                $('tbody').html(resHtml)
-            }
-        })
+                url: BigNew.category_list,
+                success: function(data) {
+                    // console.log(data);
+                    var resHtml = template('temp_category', data);
+                    $('tbody').html(resHtml)
+                }
+            })
         }
         getcategory();
 
-        $("#myModal ").on("show.bs.modal ", function(e) {
-            
-            
+        // * 添加模态框,让模态框显示的方法又2种 
+        // 1: 添加data属性  data-toggle="modal " data-target="#myModal "
+        // 2: 通过 JavaScript 调用只需一行 JavaScript 代码，即可通过元素的 id myModal 调用模态框(具体操查看文档)
+        // 我们这里用第一种
+        // 需求2: 点击新增按钮,进入新增模态框,点击编辑按钮进入编辑模态框
+        // show 方法表示模态框显示后调用该事件。如果是通过点击某个作为触发器的元素，则此元素可以通过事件的 relatedTarget 属性进行访问。
+        $("#myModal").on("show.bs.modal ", function(e) {
+            // console.dir(e);
+            // console.log(e.relatedTarget);
+            if (e.relatedTarget === $('#xinzengfenlei')[0]) {
+                // console.log(1);
+                $('#exampleModalLabel').text('新增类别');
+                $('#addorexit').text('新增').addClass('btn-primary').removeClass('btn-success');
+                // 先清空输入框内容
+                // $('#recipient-name').val('');
+                // $('#message-text').val('');
+                // reset方法属于js对象,可以恢复form表单的默认值
+                $('#myModal form')[0].reset();
+            } else {
+                // console.log(2);
+                $('#exampleModalLabel').text('编辑类别');
+                $('#addorexit').text('编辑').addClass('btn-success').removeClass('btn-primary');
+
+
+                // 显示点击对应的文章类别名字
+                $.ajax({
+                    url: BigNew.category_search,
+                    data: {
+                        id: $(e.relatedTarget).attr('data-id')
+                    },
+                    success: function(data) {
+                        // console.log(data);
+                        if (data.code === 200) {
+                            $('#categoryId').val(data.data[0].id);
+                            $('#recipient-name').val(data.data[0].name);
+                            $('#message-text').val(data.data[0].slug);
+                        }
+
+                    }
+                })
+            }
+        })
+
+        // 需求3: 点击模态框上的id=addorexit的按钮,判断是新增or编辑,分别做不同的处理
+        $('#addorexit').click(function() {
+            if ($(this).hasClass('btn-primary')) {
+
+                // alert('这是新增');
+                var categoryName = $('#recipient-name').val().trim();
+                var categorySlug = $('#message-text').val().trim();
+                $.ajax({
+                    type: 'post',
+                    url: BigNew.category_add,
+                    data: {
+                        name: categoryName,
+                        slug: categorySlug
+                    },
+                    success: function(backData) {
+                        // console.log(backData);
+                        if (backData.code === 201) {
+                            alert(backData.msg);
+                            // 把模态框关闭
+                            $('#myModal').modal('hide');
+                            // 把输入框内容清空
+                            $('#recipient-name').val('');
+                            $('#message-text').val('');
+                            // 重新获取数据渲染页面
+                            getcategory();
+                        }
+
+                    }
+                })
+            } else {
+                // alert('这是编辑');
+                var id = $('#categoryId').val().trim();
+                var categoryName = $('#recipient-name').val().trim();
+                var categorySlug = $('#message-text').val().trim();
+
+
+                $.ajax({
+                    type: 'post',
+                    url: BigNew.category_edit,
+                    data: {
+                        id: id,
+                        name: categoryName,
+                        slug: categorySlug
+                    },
+                    success: function(backData) {
+                        alert('编辑成功')
+                            // 把模态框关闭
+                        $('#myModal').modal('hide');
+                        // 重新获取数据渲染页面
+                        getcategory();
+                    }
+                })
+            }
+        })
+
+        // 需求4: 点击删除按钮,删除对应文章类别
+        $('tbody').on('click', '#btn-delete', function() {
+
+            if (confirm('您确定删除吗?')) {
+                $.ajax({
+                    type: 'post',
+                    url: BigNew.category_delete,
+                    data: {
+                        id: $(this).attr('data-id')
+                    },
+                    success: function(data) {
+                        alert(data.msg)
+                            // 重新获取数据渲染页面
+                        getcategory();
+                    }
+                })
+            }
         })
     </script>
 </body>
