@@ -96,7 +96,19 @@
                 processData: false,
                 success: function(data) {
                     if (data.code === 200) {
-                        alert('修改成功')
+                        alert('修改成功');
+                        $.ajax({
+                            type: 'get',
+                            url: BigNew.user_info,
+                            success: function(backData) {
+                                // console.log(data);
+                                // // 在iframe中如果可以使用parent 来访问上一级的页面元素
+                                parent.$('.user_info>img').attr('src', backData.data.userPic);
+                                parent.$('.user_info>span>i').text(backData.data.nickname);
+                                parent.$('.user_center_link>img').attr('src', backData.data.userPic);
+                            }
+                        })
+
                     }
                 }
             })
