@@ -44,7 +44,7 @@
                     <label for="inputPassword3" class="col-sm-2 control-label">用户图标：</label>
                     <div class="col-sm-10">
                         <img src="images/2.jpg" alt="" class="user_pic">
-                        <input style="display: block" name="userPic" type="file" id="exampleInputFile">
+                        <input style="display: none" name="userPic" type="file" id="exampleInputFile">
                         <!-- 给label标签的for属性赋值,值是input标签的id,那这样的话点击label就相当于点击了input -->
                         <br>
                         <label for="exampleInputFile">
@@ -69,22 +69,24 @@
     </div>
     <script src="./libs/http.js"></script>
     <script>
+        // 进入页面发生ajax请求,获取数据渲染页面
         $.ajax({
-            type: 'get',
-            url: BigNew.user_detail,
-            success: function(data) {
-                console.log(data);
-                if (data.code === 200) {
-                    $('#inputEmail1').val(data.data.username)
-                    $('#inputEmail2').val(data.data.nickname)
-                    $('#inputEmail3').val(data.data.email)
-                    $('#inputEmail4').val(data.data.password)
-                    $('.user_pic').attr('src', data.data.userPic)
-                } else {
-                    alert('获取失败')
+                type: 'get',
+                url: BigNew.user_detail,
+                success: function(data) {
+                    console.log(data);
+                    if (data.code === 200) {
+                        $('#inputEmail1').val(data.data.username)
+                        $('#inputEmail2').val(data.data.nickname)
+                        $('#inputEmail3').val(data.data.email)
+                        $('#inputEmail4').val(data.data.password)
+                        $('.user_pic').attr('src', data.data.userPic)
+                    } else {
+                        alert('获取失败')
+                    }
                 }
-            }
-        })
+            })
+            // 点击按钮,发生ajax请求,修改用户数据
         $('.btn-edit').click(function(e) {
             e.preventDefault();
             var fd = new FormData(document.querySelector('#form'));
@@ -97,6 +99,7 @@
                 success: function(data) {
                     if (data.code === 200) {
                         alert('修改成功');
+                        // 修改成功后,要发生ajax请求,局部更新页面
                         $.ajax({
                             type: 'get',
                             url: BigNew.user_info,
@@ -112,6 +115,17 @@
                     }
                 }
             })
+        })
+
+        // 整一个图片预览
+        $('#exampleInputFile').change(function() {
+
+
+
+
+            var files = this.files[0];
+            var url = URL.createObjectURL(files);
+            $('.user_pic').attr('src', url)
         })
     </script>
 </body>
