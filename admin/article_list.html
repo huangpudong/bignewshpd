@@ -94,7 +94,7 @@
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
                 <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
-                <a href="javascript:void(0);" data-id="{{v.id}}" class="btn btn-danger btn-xs delete">删除</a>
+                <a href="javascript:void(0);" data-id="{{v.id}}" class="btn btn-danger btn-xs delete" id="delete">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -145,6 +145,7 @@
                     }
                 })
             }
+            var currentPage = 1; // 当前页
             // 需求2:  在发生ajax请求,获取所有的文章渲染到页面,在用分页插件实现分页效果
             getArticleQuery(1, function(backData) {
                 $('#pagination-demo').twbsPagination({
@@ -155,6 +156,7 @@
                     next: '下一页',
                     last: '尾页',
                     onPageClick: function(event, page) {
+                        currentPage = page;
                         // 点击分页按钮,又会发生ajax请求,获取当前页面的文章,渲染到页面
                         getArticleQuery(page)
                     }
@@ -172,11 +174,31 @@
 
             //需求4: 点击发表文章, 左侧会有样式变化
             $('#release_btn').click(function() {
+                // 如果是iframe中的内容,可以使用parent访问上一级的元素
                 parent.$('.level02>li').eq(1).click();
             })
 
-
-
+            // 需求5: 点击删除按钮,发生ajax请求,删除对应的文章, 在发生ajax请求更新文章
+            $('table').on('click', '#delete', function(e) {
+                $.ajax({
+                    type: 'post',
+                    url: BigNew.article_delete,
+                    data: {
+                        id: $(this).attr('data-id')
+                    },
+                    success: function(backData) {
+                        if (backData.code === 204) {
+                            alert(backData.msg);
+                            getArticleQuery(currentPage, function(backData) {
+                                if (backData.data.data.length === 0) {
+                                    // getArticleQuery(currentPage - 1)
+                                    $('#pagination-demo').twbsPagination('changeTotalPages', backData.data.totalPage, currentPage - 1);
+                                }
+                            })
+                        }
+                    }
+                })
+            })
         })
     </script>
 </body>
