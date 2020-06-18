@@ -74,7 +74,7 @@
                 type: 'get',
                 url: BigNew.user_detail,
                 success: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data.code === 200) {
                         $('#inputEmail1').val(data.data.username)
                         $('#inputEmail2').val(data.data.nickname)
@@ -119,10 +119,6 @@
 
         // 整一个图片预览
         $('#exampleInputFile').change(function() {
-
-
-
-
             var files = this.files[0];
             var url = URL.createObjectURL(files);
             $('.user_pic').attr('src', url)

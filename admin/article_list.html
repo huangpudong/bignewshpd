@@ -93,14 +93,14 @@
             <td class="text-center">{{v.date}}</td>
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
-                <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
-                <a href="javascript:void(0);" data-id="{{v.id}}" class="btn btn-danger btn-xs delete" id="delete">删除</a>
+                <a href="article_edit.html?id={{v.id}}" class="btn btn-default btn-xs" id="bianji">编辑</a>
+                <a href="javascript:void(0); " data-id="{{v.id}}" class="btn btn-danger btn-xs delete " id="delete">删除</a>
             </td>
         </tr>
         {{/each}}
     </script>
     <!-- 引入分页插件 -->
-    <script src="./libs/jquery.twbsPagination.js"></script>
+    <script src="./libs/jquery.twbsPagination.js "></script>
     <script>
         //入口函数
         $(function() {
@@ -130,7 +130,7 @@
                         perpage: 5
                     },
                     success: function(backData) {
-                        console.log(backData);
+                        // console.log(backData);
                         var resHtml = template('article', backData);
                         $('tbody').html(resHtml);
                         if (backData.data.totalPage === 0) {
@@ -138,6 +138,7 @@
                         } else {
                             $('.text-center>ul').show().next('h2').hide();
                         }
+
                         if (typeof callBack === 'function') {
                             callBack(backData);
                         }
@@ -167,18 +168,14 @@
             $('#btnSearch').click(function(e) {
                 e.preventDefault();
                 getArticleQuery(1, function(backData) {
-                    // 修改分页
+                    // 重绘分页
                     $('#pagination-demo').twbsPagination('changeTotalPages', backData.data.totalPage, 1);
                 })
             })
 
-            //需求4: 点击发表文章, 左侧会有样式变化
-            $('#release_btn').click(function() {
-                // 如果是iframe中的内容,可以使用parent访问上一级的元素
-                parent.$('.level02>li').eq(1).click();
-            })
 
-            // 需求5: 点击删除按钮,发生ajax请求,删除对应的文章, 在发生ajax请求更新文章
+
+            // 需求4: 点击删除按钮,发生ajax请求,删除对应的文章, 在发生ajax请求更新文章
             $('table').on('click', '#delete', function(e) {
                 $.ajax({
                     type: 'post',
@@ -193,11 +190,26 @@
                                 if (backData.data.data.length === 0) {
                                     // getArticleQuery(currentPage - 1)
                                     $('#pagination-demo').twbsPagination('changeTotalPages', backData.data.totalPage, currentPage - 1);
+                                } else {
+                                    $('#pagination-demo').twbsPagination('changeTotalPages', backData.data.totalPage, currentPage);
                                 }
                             })
                         }
                     }
                 })
+            })
+
+            //需求5: 点击发表文章, 左侧会有样式变化
+            $('#release_btn').click(function() {
+                // 如果是iframe中的内容,可以使用parent访问上一级的元素
+                // parent.$('.level02>li>a')[0].click();
+                parent.$('.level02>li').eq(1).children('a')[0].click()
+            })
+
+
+            // 点击编辑按钮,把id值传过去
+            $('#bianji').click(function() {
+                sessionStorage.setItem(id, $(this).attr('data-id'))
             })
         })
     </script>
