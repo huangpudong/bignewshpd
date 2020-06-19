@@ -59,14 +59,13 @@
                 当前位置： <a href="#">首页</a> &gt; <a href="#">科技</a> &gt; 文章详情
             </div>
             <h3 class="article_title">马斯克的新花样？连接人脑和电脑的初创公司又筹了一笔钱</h3>
-            <div class="article_info">杰克 发布于 2019-05-08 07:08:46&nbsp;&nbsp;&nbsp;分类: 奇趣事&nbsp;&nbsp;&nbsp;阅读:
-                (98)&nbsp;&nbsp;&nbsp;评论: (0)</div>
+            <div class="article_info">杰克 发布于 2019-05-08 07:08:46&nbsp;&nbsp;&nbsp;分类: 奇趣事&nbsp;&nbsp;&nbsp;阅读: (98)&nbsp;&nbsp;&nbsp;评论: (0)</div>
             <div class="article_con">
 
                 <p>“上天入地”还不够？硅谷“钢铁侠”马斯克名下一家低调的公司最近又融了一大笔钱。</p>
 
-                <p>马斯克投资的一家小型且不为人熟知的脑机接口（brain-computer
-                    interface）公司Neuralink披露，该公司融到了3900万美元，虽然不及公司计划的融资额5100万美元，但也比上次的融资多了不少。</p>
+                <p>马斯克投资的一家小型且不为人熟知的脑机接口（brain-computer interface）公司Neuralink披露，该公司融到了3900万美元，虽然不及公司计划的融资额5100万美元，但也比上次的融资多了不少。
+                </p>
 
                 <p>两年前该公司曾计划融资1亿美元，但只拿到了2700万美元的融资。</p>
 
@@ -76,8 +75,7 @@
 
             </div>
             <div class="article_links">
-                上一篇： <a href="#">世界第一台可以玩游戏的冰箱</a><br>
-                下一篇： <a href="#">世界第一个可以玩游戏的马桶、世界上第一个可以玩游戏的茶杯</a>
+                上一篇： <a href="#">世界第一台可以玩游戏的冰箱</a><br> 下一篇： <a href="#">世界第一个可以玩游戏的马桶、世界上第一个可以玩游戏的茶杯</a>
             </div>
 
             <form action="" class="comment_form">
@@ -208,7 +206,108 @@
     <!-- 引入模板引擎js文件 -->
     <script src="./js/template-web.js"></script>
     <script src="./js/jquery-1.12.4.min.js"></script>
+    <!-- 文章分类模板下拉框 -->
+    <script id="article-category1" type="text/html">
+        <li class="up"></li>
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
 
+    <!-- 文章分类模板列表 -->
+    <script id="article-category2" type="text/html">
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
+
+    <!-- 文章信息 -->
+    <script id="article_info" type="text/html">
+        {{data.author}} 发布于 {{data.date}}&nbsp;&nbsp;&nbsp;分类: {{data.category}}&nbsp;&nbsp;&nbsp;阅读: ({{data.read}})&nbsp;&nbsp;&nbsp;评论: ({{data.comments}})
+    </script>
+
+    <!-- 评论模板 -->
+    <script id="comments" type="text/html">
+        {{each data v}}
+        <div class="comment_detail_list">
+            <div class="person_pic fl">{{v.author[0]}}</div>
+            <div class="name_time fl"><b>{{v.author}}</b><span>{{v.date}}</span></div>
+            <div class="comment_text fl">
+                {{v.content}}
+            </div>
+        </div>
+        {{/each}}
+    </script>
+    <script src="./js/indexOrList.js"></script>
+    <script>
+        $(function() {
+            var id = window.location.search.split('=')[1];
+            // 根据id获取文章详情,渲染到页面
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/article',
+                data: {
+                    id: id
+                },
+                success: function(data) {
+                    // console.log(data);
+                    if (data.code === 200) {
+                        $('.article_title').text(data.data.title);
+                        $('.article_con').html(data.data.content);
+                        var resHtml = template('article_info', data);
+                        $('.article_info').html(resHtml);
+                        // 上一篇
+                        if (data.data.prev == null) {
+                            $('.article_links a:eq(0)').text('没有了')
+                        } else {
+                            $('.article_links a:eq(0)').attr('href', './article.html?id=' + data.data.prev.id)
+                            $('.article_links a:eq(0)').text(data.data.prev.title)
+                        }
+                        // 上一篇
+                        if (data.data.next == null) {
+                            $('.article_links a:eq(1)').text('没有了')
+                        } else {
+                            $('.article_links a:eq(1)').attr('href', './article.html?id=' + data.data.next.id)
+                            $('.article_links a:eq(1)').text(data.data.next.title)
+                        }
+                    }
+                }
+            })
+
+
+            //获取评论
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/get_comment',
+                data: {
+                    articleId: id
+                },
+                success: function(data) {
+                    var resHtml = template('comments', data);
+                    $('.comment_list_con').html(resHtml);
+                    $('.comment_count').text(data.data.length + '条评论');
+                }
+            })
+
+            //fa biao pin run
+
+            $('.comment_sub').click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8080/api/v1/index/post_comment',
+                    data: {
+                        author: $('.comment_name').val().trim(),
+                        content: $('.comment_input').val().trim(),
+                        articleId: id
+                    },
+                    success: function(data) {
+                        // console.log(data);
+                        alert(data.msg)
+
+                    }
+                })
+            })
+        })
+    </script>
 </body>
 
 </html>

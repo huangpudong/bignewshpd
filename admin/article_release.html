@@ -132,9 +132,8 @@
             function setArticle(e, state) {
                 e.preventDefault();
                 // 文章内容
-                var article = $('#editor p').text();
                 var fd = new FormData($('.article_form')[0]);
-                fd.append('content', article);
+                fd.append('content', editor.txt.html());
                 if (state !== undefined) {
                     fd.append('state', '已发布');
                 }

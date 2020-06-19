@@ -137,11 +137,11 @@
 
             <div id="pagination" class="page"></div>
             <script>
-                $(function () {
+                $(function() {
                     $("#pagination").pagination({
                         currentPage: 2,
                         totalPage: 8,
-                        callback: function (current) {
+                        callback: function(current) {
                             alert('ok!');
                         }
                     });
@@ -152,7 +152,7 @@
         <div class="right_con setfl">
             <div class="common_wrap">
                 <h3><i class="fa fa-bar-chart"></i> 一周热门排行</h3>
-                <ul class="content_list">
+                <ul class="content_list content_list1">
                     <li><span class="first">1</span><a href="#">神奇的水滴摄影，泡泡中的世界泡泡中的世界</a></li>
                     <li><span class="second">2</span><a href="#">神奇的水滴摄影，泡泡中的世界</a></li>
                     <li><span class="third">3</span><a href="#">神奇的水滴摄影，泡泡中的世界</a></li>
@@ -227,6 +227,108 @@
     </div>
     <!-- 导包template -->
     <script src="./js/template-web.js"></script>
+
+    <!-- 最新资讯模板 -->
+    <script id="new_latest" type="text/html">
+
+        {{each data.data v}}
+        <div class="common_news_list">
+            <a href="./article.html?id={{v.id}}" class="list_pic"><img src="{{v.cover}}" alt=""></a>
+            <h4><a href="./article.html?id={{v.id}}">{{v.title}}</a></h4>
+            <p>{{v.intro}}
+            </p>
+            <div class="new_info">
+                <span>标签：{{v.category}}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<i class="fa fa-eye"></i>&nbsp;阅读( {{v.read}}
+                            )&nbsp;&nbsp;&nbsp;<i class="fa fa-commenting"></i>&nbsp;评论( {{v.comments}} )</span>
+                <b>发布于 {{v.date}}</b>
+            </div>
+        </div>
+        {{/each}}
+        <div id="pagination" class="page"></div>
+        <script>
+            $(function() {
+                $("#pagination").pagination({
+                    currentPage: 1,
+                    totalPage: 8,
+                    callback: function(current) {
+                        alert('ok!');
+                    }
+                });
+            });
+        </script>
+    </script>
+
+
+    <!-- 最新评论模板 -->
+    <script id="comments" type="text/html">
+        <b><em>{{data}} {{time}}</em> 9个月前(08-14)说:</b>
+        <strong>挺会玩的</strong>
+    </script>
+
+    <!-- 文章分类模板下拉框 -->
+    <script id="article-category1" type="text/html">
+        <li class="up"></li>
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
+
+    <!-- 文章分类模板列表 -->
+    <script id="article-category2" type="text/html">
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
+    <script src="./js/indexOrList.js"></script>
+    <script>
+        $(function() {
+
+            var key = window.location.search.split('=')[0];
+            var value = window.location.search.split('=')[1];
+            console.log(value);
+
+            if (key === undefined) {
+                window.location.href = './index.html';
+            } else if (key === '?search') {
+                console.log('这是搜索的');
+                value = decodeURI(value);
+
+                $.ajax({
+                    url: 'http://localhost:8080/api/v1/index/search',
+                    data: {
+                        key: value
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        if (data.code === 200) {
+                            if (data.data.totalCount === 0) {
+                                $('.left_con.setfr').html('<div class="list_title"><h3>关键字' + value + '</h3></div>' + '没有数据!');
+                            } else {
+                                var resHtml = template('new_latest', data);
+                                $('.left_con.setfr').html('<div class="list_title"><h3>关键字: ' + value + '</h3></div>' + resHtml);
+                            }
+                        }
+                    }
+                })
+            } else {
+                console.log('这是文章类型的');
+                $.ajax({
+                    url: 'http://localhost:8080/api/v1/index/search',
+                    data: {
+                        type: value
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        if (data.code === 200) {
+                            var resHtml = template('new_latest', data);
+                            $('.left_con.setfr').html('<div class="list_title"><h3>' + data.data.data[0].category + '</h3></div>' + resHtml);
+                        }
+                    }
+                })
+
+            }
+        })
+    </script>
 </body>
 
 </html>

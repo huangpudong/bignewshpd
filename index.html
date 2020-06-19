@@ -227,6 +227,90 @@
     <script src="./js/template-web.js"></script>
     <!-- 引入jq文件 -->
     <script src="./js/jquery-1.12.4.min.js"></script>
+
+    <!-- 最新资讯模板 -->
+    <script id="new_latest" type="text/html">
+        {{each data v}}
+        <div class="common_news_list">
+            <a href="./article.html?id={{v.id}}" class="list_pic"><img src="{{v.cover}}" alt=""></a>
+            <h4><a href="./article.html?id={{v.id}}">{{v.title}}</a></h4>
+            <p>{{v.intro}}
+            </p>
+            <div class="new_info">
+                <span>标签：{{v.category}}&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<i class="fa fa-eye"></i>&nbsp;阅读( {{v.read}}
+                            )&nbsp;&nbsp;&nbsp;<i class="fa fa-commenting"></i>&nbsp;评论( {{v.comments}} )</span>
+                <b>发布于 {{v.date}}</b>
+            </div>
+        </div>
+        {{/each}}
+    </script>
+
+    <!-- hotpic热点图模板 -->
+    <script id="hotpic" type="text/html">
+        {{each data v}} {{if $index==0}}
+        <li class="first">
+            {{else}}
+            <li>
+                {{/if}}
+                <a href="./article.html?id={{v.id}}"><img src="{{v.cover}}" alt=""></a>
+                <p>{{v.title}}</p>
+            </li>
+            {{/each}}
+    </script>
+    <!-- 最新评论模板 -->
+    <!-- <script id="comments" type="text/html">
+        <b><em>{{data}} {{time}}</em> 9个月前(08-14)说:</b>
+        <strong>挺会玩的</strong>
+    </script> -->
+
+    <!-- 文章分类模板下拉框 -->
+    <script id="article-category1" type="text/html">
+        <li class="up"></li>
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
+
+    <!-- 文章分类模板列表 -->
+    <script id="article-category2" type="text/html">
+        {{each data}}
+        <li><a href="./list.html?id={{$value.id}}">{{$value.name}}</a></li>
+        {{/each}}
+    </script>
+
+    <script src="./js/indexOrList.js"></script>
+    <script>
+        // 入口函数
+        $(function() {
+
+            // $('.search_txt').val('');
+            // 1.最新资讯
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/latest',
+                success: function(data) {
+                    // console.log(data);
+                    if (data.code === 200) {
+                        var resHtml = template('new_latest', data);
+                        $('.common_news').html(resHtml);
+                    }
+
+                }
+            })
+
+            // 2. 热点图
+            $.ajax({
+                url: 'http://localhost:8080/api/v1/index/hotpic',
+                success: function(data) {
+                    // console.log(data);
+                    if (data.code === 200) {
+                        var resHtml = template('hotpic', data);
+                        $('.focus_list').html(resHtml);
+                    }
+                }
+            })
+
+        })
+    </script>
 </body>
 
 </html>
